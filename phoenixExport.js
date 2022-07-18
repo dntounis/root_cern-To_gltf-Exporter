@@ -44,7 +44,7 @@ function filterArrayInPlace(a, condition, thisArg) {
  */
 function cleanup_geometry(node, hidden_paths, max_level=999, level = 0) {
     if (node.fVolume.fNodes) {
-        // drop hidden nodes, and everything after level 4
+        // drop hidden nodes, and everything after level max_level
         filterArrayInPlace(node.fVolume.fNodes.arr, n=>level<max_level&&!matches(n.fName, hidden_paths));
         // recurse to children
         for (const snode of node.fVolume.fNodes.arr) {
@@ -186,6 +186,16 @@ function set_visible_recursively(node) {
         }
     }
 }
+// makes given node and all its children recursively invisible
+function set_invisible_recursively(node) {
+    setInvisible(node);
+    if (node.fVolume.fNodes) {
+        for (var j = 0; j < node.fVolume.fNodes.arr.length; j++) {
+            var snode = node.fVolume.fNodes.arr[j];
+            set_invisible_recursively(snode);
+        }
+    }
+}
 
 /**
  * make only the given paths visible in a geometry and returns
@@ -201,8 +211,7 @@ function keep_only_subpart(volume, paths) {
             set_visible_recursively(snode);
             anyfound=true;
         } else {
-            setInvisible(snode);
-            // only hide if no subpart is shown
+            // make daughers visible if a subpart is shown
             var subpartfound = keep_only_subpart(snode.fVolume, paths);
             if (subpartfound) {
                 setVisibleDaughter(snode);
@@ -211,6 +220,22 @@ function keep_only_subpart(volume, paths) {
         }
     }
     return anyfound;
+}
+
+/**
+ * Removes children nodes that are not matching paths
+ * these should never have been created, but jsRoot has limitations and may create
+ * unwanted children in cases where the smae logical volume is shared by several physical
+ * volumes out of which some should be visible and others not.
+ * Root is never checking the flags of the physical volumes, only of the logical one,
+ * creating this situation
+ */
+function cleanupChildren(child, paths) {
+    // check all children and call ourselves recursively when we keep one
+    filterArrayInPlace(child.children, n=>n.name==''||matches(n.name, paths));
+    for (var n = 0; n < child.children.length; n++) {
+        cleanupChildren(child.children[n], paths);
+    }
 }
 
 /**
@@ -236,24 +261,29 @@ async function internal_convert_geometry(obj, filename, max_level, subparts, hid
     // for each geometry subpart, duplicate the geometry and keep only the subpart
     body.innerHTML += "<h2>Generating all scenes (one per subpart)</h2>"
     await forceDisplay()
+
     for (const [name, entry] of Object.entries(subparts)) {
         body.innerHTML += "  " + name + "</br>"
         await forceDisplay()
         // drop nodes we do not want to see at all (usually too detailed parts)
         cleanup_geometry(obj.fNodes.arr[0], hide_children, max_level);
         // dump to gltf, using one scene per subpart
-        // set nb of degrees per face for circles approximation (default 6)
-        // here 15 means circles are polygones with 24 faces (default 60)
+        // set nb of degrees per face for circles approximation to nFaces
         geo.geoCfg('GradPerSegm', 360/nFaces);
         const paths = entry[0];
         const visibility = entry[1];
         // extract subpart of ROOT geometry
+        // first reset visibility to be sure eveything is invisible
+        set_invisible_recursively(obj.fNodes.arr[0])
+        // make top node visible
         setVisible(obj.fNodes.arr[0]);
         keep_only_subpart(obj.fMasterVolume, paths);
         // convert to gltf
         var scene = new THREE.Scene();
         scene.name = name;
         var children = geo.build(obj, {dflt_colors: true, vislevel:10, numfaces: 10000000, numnodes: 500000});
+        // remove from children paths that should not be there
+        cleanupChildren(children, paths)
         scene.children.push( children );
         if (typeof visibility == "boolean") {
             scene.userData = {"visible" : visibility};
