@@ -129,8 +129,8 @@ async function convert_geometry(obj3d, name, body) {
     body.innerHTML += "<h2>Exporting to GLTF</h2>"
     await forceDisplay()
     const exporter = new THREE.GLTFExporter;
-    let gltf = await new Promise(resolve =>
-        exporter.parse(obj3d, resolve, {'binary':false})
+    let gltf = await new Promise((resolve, reject) =>
+        exporter.parse(obj3d, resolve, reject, {'binary':false})
     )
     // json output
     body.innerHTML += "<h2>Deduplicating data in GLTF</h2>"    
