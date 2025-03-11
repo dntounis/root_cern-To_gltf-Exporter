@@ -39,22 +39,33 @@
     // };
 
         const subparts = {
-            "Vertex > Barrel":         [["VtxBarrelModuleInner","VtxBarrelModuleOuter"], true, 0xff0000],  // Red
-            "Vertex > Endcap":         [["SiVertexEndcap_1", "SiVertexEndcapModule"], true, 0x00ff00],  // Green
-            "Tracker > Barrel":        [["SiTrackerModule"], true, 0x0000ff], // Blue
-            "Tracker > Endcap":        [["SiTrackerEndcap_assembly_1","Module1"], true, 0x0000ff], // Blue
-            "Tracker > Forward":       [["SiTrackerForward_assembly_3", "SiTrackerForwardModule"], true, 0xffff00], // Yellow
-            "ECal > Barrel":           [["ECalBarrel_envelope_4", "stave"], 0.5, 0xff00ff],        // Magenta
-            "ECal > Endcap":           [["ECalEndcap_envelope_5", "endcap"], 0.5, 0x00ffff],        // Cyan
-            "HCal > Barrel":           [["HCalBarrel_envelope_6", "stave_outer"], 0.3, 0xffffff],        // White
-            "HCal > Endcap":           [["HCalEndcap_envelope_7", "endcap"], 0.3, 0x888888],        // Grey
-            "HCal > RingDummy":        [["HCalRingDummy_envelope_8", "endcap"], 0.3, 0xff8800],     // Orange
-            "MuonCalorimeters":        [["MuonCalorimeters_9", "MuonBarrel_assembly_0", "MuonEndcap_assembly_1"], 0.4, 0x008800],   // Dark Green
-            "LumiCal":                 [["LumiCal_assembly_10", "LumiCal_envelope"], true, 0x880088],          // Purple
-            "BeamCal":                 [["BeamCal_assembly_11", "BeamCal_envelope"], true, 0x8888ff],          // Light Blue
-            "Solenoid":                [["Solenoid_12", "SolenoidBarrel_assembly_0", "SolenoidEndcaps"], true, 0x00aaaa],         // Teal
-            "Beampipe":                [["Beampipe_13"], true, 0xaa0000],         // Dark Red
-            "ForwardSupportTube":      [["ForwardSupportTube_14"], true, 0x00aa00] // Dark Green
+            "Vertex > Barrel":         [["VtxBarrelModuleInner","VtxBarrelModuleOuter"], true,0xE63712],  // Bright red
+            "Vertex > Endcap":         [["SiVertexEndcap_1", "SiVertexEndcapModule"], true, 0xE63712],      // Bright red
+            "Tracker > Barrel":        [["SiTrackerModule"], true, 0xD40000],      // Dark red
+            "Tracker > Endcap":        [["SiTrackerEndcap_assembly_1","Module1"], true, 0xD40000],      // Dark red
+            "Tracker > Forward":       [["SiTrackerForward_assembly_3", "SiTrackerForwardModule"], true, 0xD40000],      // Dark red
+
+
+            "ECal > Barrel":           [["ECalBarrel_envelope_4", "stave"], 0.7, 0x00A000],                 // Green
+            "ECal > Endcap":           [["ECalEndcap_envelope_5", "endcap"], 0.7, 0x00A000],                 // Green
+
+
+            "HCal > Barrel":           [["HCalBarrel_envelope_6", "stave_outer"], 0.5, 0x800080],           // Purple/violet
+            "HCal > Endcap":           [["HCalEndcap_envelope_7", "endcap"], 0.5, 0x800080],           // Purple/violet
+            "HCal > RingDummy":        [["HCalRingDummy_envelope_8", "endcap"], 0.5, 0x800080],           // Purple/violet
+
+
+            "MuonCalorimeters":        [["MuonCalorimeters_9", "MuonBarrel_assembly_0", "MuonEndcap_assembly_1"],0.4, 0x0000D0], // Blue
+
+
+            "LumiCal":                 [["LumiCal_assembly_10", "LumiCal_envelope"], true, 0x00AAAA],       // Cyan/light blue
+            "BeamCal":                 [["BeamCal_assembly_11", "BeamCal_envelope"], true, 0x00AAAA],       // Cyan/light blue
+
+
+            "Solenoid":                [["Solenoid_12", "SolenoidBarrel_assembly_0", "SolenoidEndcaps"], 0.5, 0xCCCCCC], // Light gray
+
+            "Beampipe":                [["Beampipe_13"], true, 0xFFFFFF],                                    // White
+            "ForwardSupportTube":      [["ForwardSupportTube_14"], true, 0xCCCCCC]                           // Light gray
         };
 
 
