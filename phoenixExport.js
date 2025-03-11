@@ -56,9 +56,17 @@ function cleanup_geometry(node, hidden_paths, max_level=999, level = 0) {
 function forceDisplay() {
     return new Promise(resolve => setTimeout(resolve, 0));
 }
-
+/// deduplicates identical materials in the given gltf file
 /// deduplicates identical materials in the given gltf file
 async function deduplicate(gltf, body) {
+    // Add a safety check for materials existence
+    if (!gltf || !gltf.materials || !Array.isArray(gltf.materials)) {
+        body.innerHTML += "<h3>Materials</h3>"
+        body.innerHTML += "No materials found or materials is not an array. Skipping material deduplication.<br/>"
+        await forceDisplay();
+        return gltf;
+    }
+    
     // deduplicate materials
     body.innerHTML += "<h3>Materials</h3>"
     await forceDisplay()
@@ -84,38 +92,51 @@ async function deduplicate(gltf, body) {
     }
     // now rewrite the materials table and fix the meshes
     gltf["materials"] = kept;
-    for (const mesh of gltf["meshes"]) {
-        for(const primitive of mesh["primitives"]) {
-            if ("material" in primitive) {
-                primitive["material"] = links[primitive["material"]];
+    
+    // Add safety check for meshes
+    if (gltf.meshes && Array.isArray(gltf.meshes)) {
+        for (const mesh of gltf["meshes"]) {
+            if (mesh.primitives && Array.isArray(mesh.primitives)) {
+                for(const primitive of mesh["primitives"]) {
+                    if ("material" in primitive) {
+                        primitive["material"] = links[primitive["material"]];
+                    }
+                }
             }
         }
     }
+    
     body.innerHTML += "new number of materials : " + gltf["materials"].length + "</br>"
-    // deduplicate meshes
-    body.innerHTML += "<h3>Meshes</h3>"
-    body.innerHTML += "initial number of meshes/accessors : " + gltf.meshes.length + "/" + gltf.accessors.length + "</br>"
-    await forceDisplay()
-    kept = []
-    links = {}
-    for (var index = 0; index < gltf.meshes.length; index++) {
-        var found = false;
-        for (var kindex = 0; kindex < kept.length; kindex++) {
-            if (JSON.stringify(kept[kindex]) == JSON.stringify(gltf.meshes[index])) {
-                links[index] = kindex;
-                found = true;
-                break;
+    
+    // deduplicate meshes - with safety checks
+    if (gltf.meshes && Array.isArray(gltf.meshes)) {
+        body.innerHTML += "<h3>Meshes</h3>"
+        body.innerHTML += "initial number of meshes/accessors : " + gltf.meshes.length + "/" + (gltf.accessors ? gltf.accessors.length : "N/A") + "</br>"
+        await forceDisplay()
+        kept = []
+        links = {}
+        for (var index = 0; index < gltf.meshes.length; index++) {
+            var found = false;
+            for (var kindex = 0; kindex < kept.length; kindex++) {
+                if (JSON.stringify(kept[kindex]) == JSON.stringify(gltf.meshes[index])) {
+                    links[index] = kindex;
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                links[index] = kept.length;
+                kept.push(gltf.meshes[index]);
             }
         }
-        if (!found) {
-            links[index] = kept.length;
-            kept.push(gltf.meshes[index]);
-        }
+        // now rewrite the meshes table and fix the nodes
+        gltf.meshes = kept;
+        body.innerHTML += "new number of meshes/accessors : " + gltf.meshes.length + "/" + (gltf.accessors ? gltf.accessors.length : "N/A") + "</br>"
+        await forceDisplay()
+    } else {
+        body.innerHTML += "<h3>Meshes</h3>"
+        body.innerHTML += "No meshes found or meshes is not an array. Skipping mesh deduplication.<br/>"
     }
-    // now rewrite the meshes table and fix the nodes
-    gltf.meshes = kept;
-    body.innerHTML += "new number of meshes/accessors : " + gltf.meshes.length + "/" + gltf.accessors.length + "</br>"
-    await forceDisplay()
 
     let json = JSON.stringify(gltf)
     json = json.replace(/"mesh":([0-9]+)/g, function(a,b) {
@@ -291,11 +312,49 @@ async function internal_convert_geometry(obj, filename, max_level, subparts, hid
             scene.userData = {"visible" : true, "opacity" : visibility};
         }
         scenes.push(scene);
+
+        // Suppose 'entry' is the subpart definition array
+        let color = null;
+        if (Array.isArray(entry) && entry.length > 2)
+        color = entry[2];
+        if (color !== null) {
+        scene.traverse(function(node) {
+            if (node.isMesh) {
+                node.material = node.material.clone();
+                node.material.color.setHex(color);
+            }
+        });
+        }
+
+
     }
+
+
+
+
+    
     body.innerHTML += '</br>' + scenes.length + ' scenes generated</br>';
     await forceDisplay()
-    await convert_geometry(scenes, filename, body);}
-   
+    //await convert_geometry(scenes, filename, body);}
+    if (scenes.length === 0) {
+        logFn("No scenes were generated, conversion failed");
+        return;
+      }
+      
+      // Create a parent group to hold all subpart scenes and give it a name.
+      let parentGroup = new THREE.Group();
+      parentGroup.name = "SiD Geometry";
+      for (const scene of scenes) {
+        // Ensure each subpart scene has its custom name.
+        scene.name = scene.name || "Unnamed Subpart";
+        parentGroup.add(scene);
+      }
+      
+      // Now export the parentGroup rather than the raw scenes array.
+      await convert_geometry(parentGroup, filename, body);}
+
+
+
 async function convertGeometry(inputFile, outputFile, max_level, subparts, hide_children, objectName = "Default", nFaces = 24) {
     const body = document.body
     body.innerHTML = "<h1>Converting ROOT geometry to GLTF</h1>Input file : " + inputFile + "</br>Output file : " + outputFile + "</br>Reading input..." 

@@ -1,0 +1,33 @@
+<html>
+
+  <head>
+    <script src="https://unpkg.com/three@0.139.1/build/three.js"> </script>
+    <script src="https://unpkg.com/three@0.139.1/examples/js/exporters/GLTFExporter.js"> </script>
+    <script src="https://root.cern/js/7.6.1/scripts/JSRoot.core.js"> </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.js"></script>
+  </head>
+
+<body>
+  <script type="module">
+
+    import { convertGeometry } from './phoenixExport.js';
+
+    var hide_children = [
+      "passive_",
+      "active_",
+      "PCB_"
+    ];
+
+    var subparts = {
+        "Cryo Front" : [["ECAL_Cryo_front_0"], .8],
+        "Cryo Back" : [["ECAL_Cryo_back_1"], .8],
+        "Cryo Sides" : [["ECAL_Cryo_side_2"], .8],
+        "Services Front" : [["services_front_3"], .6],
+        "Services Back" : [["services_back_4"], .6],
+        "Bath": [["LAr_bath_5"], true]
+    }
+
+    convertGeometry("./fccee_lar.root", "fccee_lar.gltf",
+                    4, subparts, hide_children, "default", 120);
+  </script>
+</body>

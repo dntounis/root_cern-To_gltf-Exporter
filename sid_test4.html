@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="https://unpkg.com/three@0.139.1/build/three.js"> </script>
+        <script src="https://unpkg.com/three@0.139.1/examples/js/exporters/GLTFExporter.js"> </script>
+        <script src="https://root.cern/js/7.6.1/scripts/JSRoot.core.js"> </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.js"></script>
+      </head>
+
+<body>
+  <h1>SiD Geometry Export - Simplified Version</h1>
+  <p>Converting with basic string matching for better stability...</p>
+
+  <script type="module">
+    // Import the exporter code
+    import { convertGeometry } from './phoenixExport.js';
+    
+    // We won't hide anything
+    const hide_children = [];
+    
+    // // Using simple string matching with wildcards at the end
+    // const subparts = {
+    //   "Vertex > Barrel":        [["/.*SiVertexBarrel.*/"], true, 0xff0000],
+    //   "Vertex > Endcap":          [["SiVertexEndcap"], true, 0x00ff00],           // Green
+    //   "Tracker > Barrel":       [["SiTrackers_2/SiTrackerBarrel_assembly_0/layer"], true, 0x0000ff],               // Blue
+    //   "Tracker > Endcap":       [["SiTrackers_2/SiTrackerEndcap_assembly"], true, 0x0000ff],               // Blue
+    //   "Tracker > Forward":        [["SiTrackerForward"], true, 0xffff00], // Yellow
+    //   "ECal > Barrel":            [["ECalBarrel"], 0.5, 0xff00ff],        // Magenta
+    //   "ECal > Endcap":            [["ECalEndcap"], 0.5, 0x00ffff],        // Cyan
+    //   "HCal > Barrel":            [["HCalBarrel"], 0.3, 0xffffff],        // White
+    //   "HCal > Endcap":            [["HCalEndcap"], 0.3, 0x888888],        // Grey
+    //   "HCal > RingDummy":         [["HCalRingDummy"], 0.3, 0xff8800],     // Orange
+    //   "MuonCalorimeters":         [["MuonCalorimeter"], 0.4, 0x008800],   // Dark Green
+    //   "LumiCal":                  [["LumiCal"], true, 0x880088],          // Purple
+    //   "BeamCal":                  [["BeamCal"], true, 0x8888ff],          // Light Blue
+    //   "Solenoid":                 [["Solenoid"], true, 0x00aaaa],         // Teal
+    //   "Beampipe":                 [["Beampipe"], true, 0xaa0000],         // Dark Red
+    //   "ForwardSupportTube":       [["ForwardSupportTube"], true, 0x00aa00] // Dark Green
+    // };
+
+        const subparts = {
+            "Vertex > Barrel":         [["VtxBarrelModuleInner","VtxBarrelModuleOuter"], true, 0xff0000],  // Red
+            "Vertex > Endcap":         [["SiVertexEndcap_1", "SiVertexEndcapModule"], true, 0x00ff00],  // Green
+            "Tracker > Barrel":        [["SiTrackerModule"], true, 0x0000ff], // Blue
+            "Tracker > Endcap":        [["SiTrackerEndcap_assembly_1","Module1"], true, 0x0000ff], // Blue
+            "Tracker > Forward":       [["SiTrackerForward_assembly_3", "SiTrackerForwardModule"], true, 0xffff00], // Yellow
+            "ECal > Barrel":           [["ECalBarrel_envelope_4", "stave"], 0.5, 0xff00ff],        // Magenta
+            "ECal > Endcap":           [["ECalEndcap_envelope_5", "endcap"], 0.5, 0x00ffff],        // Cyan
+            "HCal > Barrel":           [["HCalBarrel_envelope_6", "stave_outer"], 0.3, 0xffffff],        // White
+            "HCal > Endcap":           [["HCalEndcap_envelope_7", "endcap"], 0.3, 0x888888],        // Grey
+            "HCal > RingDummy":        [["HCalRingDummy_envelope_8", "endcap"], 0.3, 0xff8800],     // Orange
+            "MuonCalorimeters":        [["MuonCalorimeters_9", "MuonBarrel_assembly_0", "MuonEndcap_assembly_1"], 0.4, 0x008800],   // Dark Green
+            "LumiCal":                 [["LumiCal_assembly_10", "LumiCal_envelope"], true, 0x880088],          // Purple
+            "BeamCal":                 [["BeamCal_assembly_11", "BeamCal_envelope"], true, 0x8888ff],          // Light Blue
+            "Solenoid":                [["Solenoid_12", "SolenoidBarrel_assembly_0", "SolenoidEndcaps"], true, 0x00aaaa],         // Teal
+            "Beampipe":                [["Beampipe_13"], true, 0xaa0000],         // Dark Red
+            "ForwardSupportTube":      [["ForwardSupportTube_14"], true, 0x00aa00] // Dark Green
+        };
+
+
+    // Call convertGeometry with better settings:
+    // 1. Simplified naming patterns
+    // 2. More conservative max_level (10 instead of 999)
+    // 3. Fewer segments for spheres (12 instead of 24)
+    convertGeometry(
+      "SiD_o2_v04.root", 
+      "sid_phoenix_simple.gltf", 
+      10, 
+      subparts, 
+      hide_children, 
+      "default", 
+      12
+    );
+  </script>
+</body>
+</html>
