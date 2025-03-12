@@ -1,3 +1,13 @@
+
+Jim: also take a look at this: https://github.com/eic/root2cad/blob/main/README.md#root2cad
+
+More info:
+
+- https://indico.cern.ch/event/1176398/contributions/5207142/attachments/2580635/4451322/fcc_analysis_and_visualization.pdf
+- https://hep-fcc.github.io/fcc-tutorials/main/full-detector-simulations/Visualization/Visualization.html
+- https://indico.cern.ch/event/1298458/contributions/5977795/attachments/2876451/5037816/Event%20Visualization%20and%20FCCAnalyses%20Cheatsheet.pdf
+
+
 # .root to .gltf exporter
 
 > The following is a tool that can be used to convert .root files that describe a particular geometry to GLTF format, compatible with the [phoenix](https://github.com/HSF/phoenix) framework for visualization
